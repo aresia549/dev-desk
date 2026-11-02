@@ -1,0 +1,1247 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delivery Desk Dashboard</title>
+<link rel="stylesheet" href="assets/styles.css">
+
+<style>
+.assignment-control,.fee-control {
+  display:flex;flex-direction:column;gap:7px;min-width:130px
+}
+.assignment-control select,.fee-control input,.fee-control select {
+  max-width:190px;width:100%;padding:9px;border:1px solid #ddd;
+  border-radius:6px;background:white;box-sizing:border-box
+}
+.assignment-control button,.fee-control button {width:fit-content}
+.fee-display {font-weight:600;white-space:nowrap}
+.status-label {
+  display:inline-block;padding:6px 10px;border-radius:20px;
+  background:#eef2ff;color:#3730a3;font-size:12px;text-transform:capitalize
+}
+#dashboardMessage {margin:15px 0;overflow-wrap:anywhere}
+.table-wrap,.payment-review-wrap {overflow-x:auto}
+.table-wrap table {min-width:1150px}
+button:disabled {opacity:.6;cursor:not-allowed}
+.share-link-panel,.payment-settings {
+  margin-top:25px;padding:20px;border:1px solid #ddd;
+  border-radius:10px;background:#fff
+}
+.share-link-panel h3,.payment-settings h3 {margin-top:0}
+.share-link-row {display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.share-link-row input {
+  flex:1;min-width:220px;padding:11px;border:1px solid #ddd;
+  border-radius:7px;box-sizing:border-box
+}
+#customerLinkMessage,.payment-message {margin-top:10px;overflow-wrap:anywhere}
+.hidden {display:none!important}
+.payment-form {
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:14px;margin:16px 0
+}
+.payment-form label {display:flex;flex-direction:column;gap:6px;font-weight:600}
+.payment-form input,.payment-form select,.payment-form textarea {
+  width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;
+  box-sizing:border-box;font:inherit
+}
+.payment-form textarea {min-height:75px}
+.payment-toggle {display:flex!important;align-items:center}
+.payment-toggle input {width:auto!important}
+.payment-wallet {
+  display:flex;justify-content:space-between;align-items:center;
+  gap:10px;padding:12px;border:1px solid #ddd;border-radius:7px;
+  margin:10px 0;overflow-wrap:anywhere
+}
+.payment-wallet button {flex-shrink:0}
+.payment-help,.payment-review-help {font-size:13px;color:#666}
+.payment-review-wrap {margin-top:15px}
+.payment-review-wrap table {min-width:950px}
+.payment-status {
+  display:inline-block;padding:6px 10px;border-radius:20px;
+  font-size:12px;text-transform:capitalize;background:#fff7ed;color:#9a3412
+}
+.payment-status.succeeded {background:#dcfce7;color:#166534}
+.payment-status.failed {background:#fee2e2;color:#991b1b}
+.payment-actions {display:flex;gap:7px;flex-wrap:wrap}
+.payment-reference {font-weight:600}
+.payment-date {font-size:12px;color:#777}
+.payment-empty {padding:18px;text-align:center;color:#666}
+</style>
+</head>
+
+<body class="dashboard-bg">
+
+<aside class="sidebar">
+<a class="brand" href="index.html">
+<span class="brand-mark">D</span>
+<span>delivery<span class="brand-light">desk</span></span>
+</a>
+
+<div class="workspace-label">WORKSPACE</div>
+<div class="workspace-name">
+<span class="workspace-icon">⌂</span>
+<span id="workspaceName">Loading...</span>
+</div>
+
+<nav class="side-nav">
+<small>WORKSPACE</small>
+<a class="active" href="#overview">▦ <span>Overview</span></a>
+<a href="#deliveries">▣ <span>Deliveries</span></a>
+<a href="#payments">＄ <span>Payments</span></a>
+<a href="#team" id="teamNav">♙ <span>Team members</span></a>
+<small id="manageLabel">MANAGE</small>
+<a href="#settings" id="settingsNav">⚙ <span>Settings</span></a>
+<a href="payouts.html">＄ <span>Payouts</span></a>
+</nav>
+
+<div class="sidebar-bottom">
+<div class="profile-mini">
+<span class="avatar">DD</span>
+<div>
+<b id="sideUser">Loading...</b>
+<small id="sideRole">Checking account...</small>
+</div>
+</div>
+<button id="logoutBtn" class="logout-btn">↪ Sign out</button>
+</div>
+</aside>
+
+<main class="dash-main" id="overview">
+
+<header class="dash-header">
+<div>
+<span class="eyebrow">DELIVERY DESK WORKSPACE</span>
+<h1 id="welcomeTitle">Loading dashboard...</h1>
+<p id="welcomeDescription">Retrieving workspace information.</p>
+</div>
+<a class="btn btn-primary btn-small" href="delivery.html" target="_blank">
++ New delivery request
+</a>
+</header>
+
+<section class="stat-grid">
+<article class="stat-card">
+<div class="stat-top">Total deliveries</div>
+<strong id="totalCount">0</strong>
+<small>Accessible delivery requests</small>
+</article>
+<article class="stat-card">
+<div class="stat-top">Awaiting review</div>
+<strong id="pendingCount">0</strong>
+<small>New customer requests</small>
+</article>
+<article class="stat-card">
+<div class="stat-top">Completed</div>
+<strong id="completedCount">0</strong>
+<small>Successfully delivered</small>
+</article>
+<article class="stat-card">
+<div class="stat-top">Account role</div>
+<strong id="roleStat">-</strong>
+<small>Workspace permissions</small>
+</article>
+</section>
+
+<section class="panel" id="deliveries">
+<div class="panel-head">
+<div>
+<h2>Delivery requests</h2>
+<p>Monitor and manage delivery requests and charges.</p>
+</div>
+<span class="table-count" id="tableCount">0 requests</span>
+</div>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>REQUEST</th>
+<th>CUSTOMER</th>
+<th>DESTINATION</th>
+<th>PAYMENT METHOD</th>
+<th>DELIVERY FEE</th>
+<th>STATUS</th>
+<th>ASSIGNED EMPLOYEE</th>
+</tr>
+</thead>
+<tbody id="deliveryRows">
+<tr><td colspan="7" class="empty-cell">Loading deliveries...</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section class="lower-grid">
+
+<article class="panel" id="payments">
+<div class="panel-head">
+<div>
+<h2>Payment overview</h2>
+<p>Review customer payment submissions and verify receipts.</p>
+</div>
+</div>
+
+<div id="paymentReviewContent">
+<p>Loading payment records...</p>
+</div>
+
+<p class="payment-review-help">
+Only approve a payment after confirming that the money has
+actually arrived in your bank account or cryptocurrency wallet.
+</p>
+</article>
+
+<article class="panel" id="team">
+<div class="panel-head">
+<div>
+<h2>Team access</h2>
+<p>Workspace account information.</p>
+</div>
+</div>
+<div class="team-row">
+<span class="avatar">DD</span>
+<div>
+<b id="teamAccountName">Your account</b>
+<small id="teamAccountRole">Workspace account</small>
+</div>
+<span class="pill pill-green">Active</span>
+</div>
+</article>
+
+</section>
+
+<section class="panel settings-panel" id="settings">
+<div class="panel-head">
+<div>
+<h2>Workspace settings</h2>
+<p>Workspace administration information.</p>
+</div>
+</div>
+
+<div class="settings-grid">
+<div><small>Workspace</small><b id="settingsWorkspace">Loading...</b></div>
+<div><small>Account role</small><b id="settingsRole">Loading...</b></div>
+<div><small>Account status</small><b>Active</b></div>
+</div>
+
+<div id="customerLinkPanel" class="share-link-panel hidden">
+<h3>Customer delivery form link</h3>
+<p>Generate a shareable link for customers. Requests will be attached to your workspace.</p>
+
+<div class="share-link-row">
+<input type="text" id="customerFormLink" readonly placeholder="Click Generate link">
+<button id="generateCustomerLink" class="btn btn-primary btn-small" type="button">Generate link</button>
+<button id="copyCustomerLink" class="btn btn-small" type="button" disabled>Copy link</button>
+</div>
+<p id="customerLinkMessage" role="status"></p>
+</div>
+
+<div id="paymentSettingsPanel" class="payment-settings hidden">
+
+<h3>Bank transfer settings</h3>
+<p>Enter your receiving bank details. Customers will only see these details when bank transfer is enabled.</p>
+
+<div class="payment-form">
+<label class="payment-toggle">
+<span><input type="checkbox" id="bankEnabled"> Enable bank transfer</span>
+</label>
+
+<label>Bank name
+<input id="bankName" type="text" placeholder="Enter bank name">
+</label>
+
+<label>Account name
+<input id="accountName" type="text" placeholder="Enter account name">
+</label>
+
+<label>Account number
+<input id="accountNumber" type="text" inputmode="numeric" placeholder="Enter account number">
+</label>
+
+<label>Currency
+<select id="bankCurrency">
+<option value="NGN">NGN</option>
+<option value="USD">USD</option>
+<option value="GBP">GBP</option>
+<option value="EUR">EUR</option>
+<option value="CAD">CAD</option>
+<option value="AUD">AUD</option>
+<option value="GHS">GHS</option>
+<option value="KES">KES</option>
+<option value="ZAR">ZAR</option>
+</select>
+</label>
+
+<label>Payment instructions
+<textarea id="bankInstructions" placeholder="Instructions for customers"></textarea>
+</label>
+</div>
+
+<button type="button" class="btn btn-primary btn-small" id="saveBankSettings">
+Save bank settings
+</button>
+
+<hr>
+
+<h3>Cryptocurrency settings</h3>
+<p>Add one or more cryptocurrency wallet addresses.</p>
+
+<div class="payment-form">
+
+<label class="payment-toggle">
+<span><input type="checkbox" id="cryptoEnabled"> Enable cryptocurrency payments</span>
+</label>
+
+<label>Coin
+<select id="cryptoCoin">
+<option value="BTC">Bitcoin (BTC)</option>
+<option value="USDT">USDT</option>
+<option value="USDC">USDC</option>
+<option value="OTHER">Other</option>
+</select>
+</label>
+
+<label>Network
+<select id="cryptoNetwork">
+<option value="Bitcoin">Bitcoin</option>
+<option value="Ethereum">Ethereum (ERC20)</option>
+<option value="Tron">Tron (TRC20)</option>
+<option value="Solana">Solana</option>
+<option value="Polygon">Polygon</option>
+<option value="BNB Smart Chain">BNB Smart Chain (BEP20)</option>
+<option value="Other">Other</option>
+</select>
+</label>
+
+<label>Wallet address
+<input id="cryptoAddress" type="text" placeholder="Paste wallet address">
+</label>
+
+<label>Wallet instructions
+<input id="cryptoInstructions" type="text" placeholder="Optional instructions">
+</label>
+
+</div>
+
+<button type="button" class="btn btn-primary btn-small" id="addCryptoWallet">
+Add wallet
+</button>
+
+<div id="cryptoWalletList"></div>
+
+<button type="button" class="btn btn-primary btn-small" id="saveCryptoSettings">
+Save crypto settings
+</button>
+
+<p class="payment-help">
+Important: Confirm the coin and network before accepting payment.
+Sending funds through an incompatible network can cause permanent loss.
+</p>
+
+<p id="paymentSettingsMessage" class="payment-message" role="status"></p>
+
+</div>
+</section>
+
+<p id="dashboardMessage" role="status"></p>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/config.js"></script>
+
+<script>
+(async function() {
+
+const rows = document.getElementById("deliveryRows");
+const message = document.getElementById("dashboardMessage");
+const logoutButton = document.getElementById("logoutBtn");
+
+const linkPanel = document.getElementById("customerLinkPanel");
+const linkInput = document.getElementById("customerFormLink");
+const generateButton = document.getElementById("generateCustomerLink");
+const copyButton = document.getElementById("copyCustomerLink");
+const linkMessage = document.getElementById("customerLinkMessage");
+const paymentPanel = document.getElementById("paymentSettingsPanel");
+const paymentReviewContent = document.getElementById("paymentReviewContent");
+
+let db, user, profile, workspace;
+let isOwner = false;
+let cryptoWallets = [];
+
+const currencies = ["NGN","USD","GBP","EUR","CAD","AUD","GHS","KES","ZAR"];
+
+function showError(text) {
+  message.textContent = text;
+  message.style.color = "#b42318";
+}
+
+function showSuccess(text) {
+  message.textContent = text;
+  message.style.color = "green";
+}
+
+function paymentMessage(text,error=false) {
+  const el = document.getElementById("paymentSettingsMessage");
+  el.textContent = text;
+  el.style.color = error ? "#b42318" : "green";
+}
+
+function setLoading(text) {
+  rows.innerHTML = "";
+  const tr = document.createElement("tr");
+  const td = document.createElement("td");
+  td.colSpan = 7;
+  td.className = "empty-cell";
+  td.textContent = text;
+  tr.appendChild(td);
+  rows.appendChild(tr);
+}
+
+function formatStatus(status) {
+  const labels = {
+    new:"New",confirmed:"Confirmed",assigned:"Assigned",
+    accepted:"Accepted",picked_up:"Picked up",
+    in_transit:"In transit",delivered:"Delivered",
+    cancelled:"Cancelled",failed:"Failed delivery"
+  };
+  return labels[status] || status || "Unknown";
+}
+
+function addCell(tr,value) {
+  const td = document.createElement("td");
+  td.textContent = value || "-";
+  tr.appendChild(td);
+  return td;
+}
+
+function formatFee(amount,currency) {
+  if (amount === null || amount === undefined) return "Not set";
+  return Number(amount).toLocaleString(undefined,{
+    minimumFractionDigits:2,
+    maximumFractionDigits:2
+  }) + " " + (currency || "NGN");
+}
+
+/* CUSTOMER LINK GENERATOR */
+function setupCustomerLink() {
+  if (!isOwner) {
+    linkPanel.style.display = "none";
+    return;
+  }
+
+  linkPanel.classList.remove("hidden");
+
+  generateButton.addEventListener("click",function() {
+    if (!workspace || !workspace.public_form_token) {
+      linkMessage.textContent = "No customer form token was found.";
+      linkMessage.style.color = "#b42318";
+      return;
+    }
+
+    const url = new URL("delivery.html",window.location.href);
+    url.searchParams.set("token",workspace.public_form_token);
+
+    linkInput.value = url.href;
+    copyButton.disabled = false;
+    linkMessage.textContent = "Your customer delivery link is ready.";
+    linkMessage.style.color = "green";
+  });
+
+  copyButton.addEventListener("click",async function() {
+    if (!linkInput.value) return;
+
+    try {
+      await navigator.clipboard.writeText(linkInput.value);
+      linkMessage.textContent = "Link copied successfully.";
+      linkMessage.style.color = "green";
+    } catch(error) {
+      linkInput.focus();
+      linkInput.select();
+      linkMessage.textContent = "Press Ctrl+C to copy the selected link.";
+      linkMessage.style.color = "#b42318";
+    }
+  });
+}
+
+/* CRYPTO WALLET LIST */
+function renderCryptoWallets() {
+  const container = document.getElementById("cryptoWalletList");
+  container.innerHTML = "";
+
+  cryptoWallets.forEach(function(wallet,index) {
+    const item = document.createElement("div");
+    item.className = "payment-wallet";
+
+    const details = document.createElement("div");
+    details.textContent =
+      wallet.coin + " | " + wallet.network + " | " + wallet.address;
+
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "btn btn-small";
+    remove.textContent = "Remove";
+
+    remove.addEventListener("click",function() {
+      cryptoWallets.splice(index,1);
+      renderCryptoWallets();
+      paymentMessage("Wallet removed. Save crypto settings to apply the change.");
+    });
+
+    item.appendChild(details);
+    item.appendChild(remove);
+    container.appendChild(item);
+  });
+}
+
+/* LOAD PAYMENT SETTINGS */
+async function loadPaymentSettings() {
+  const {data,error} = await db
+    .from("workspace_payment_settings")
+    .select("*")
+    .eq("workspace_id",profile.workspace_id)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data) return;
+
+  document.getElementById("bankEnabled").checked = !!data.bank_transfer_enabled;
+  document.getElementById("bankName").value = data.bank_name || "";
+  document.getElementById("accountName").value = data.account_name || "";
+  document.getElementById("accountNumber").value = data.account_number || "";
+  document.getElementById("bankCurrency").value = data.bank_currency || "NGN";
+  document.getElementById("bankInstructions").value = data.bank_instructions || "";
+
+  document.getElementById("cryptoEnabled").checked = !!data.crypto_enabled;
+
+  cryptoWallets = Array.isArray(data.crypto_wallets)
+    ? data.crypto_wallets
+    : [];
+
+  renderCryptoWallets();
+}
+
+/* SAVE PAYMENT SETTINGS */
+async function savePaymentSettings(values) {
+  const {error} = await db
+    .from("workspace_payment_settings")
+    .upsert({
+      workspace_id:profile.workspace_id,
+      ...values,
+      updated_at:new Date().toISOString()
+    },{onConflict:"workspace_id"});
+
+  if (error) throw error;
+}
+
+/* OWNER PAYMENT SETTINGS */
+function setupPaymentSettings() {
+  if (!isOwner) {
+    paymentPanel.classList.add("hidden");
+    return;
+  }
+
+  paymentPanel.classList.remove("hidden");
+
+  document.getElementById("saveBankSettings").addEventListener("click",async function() {
+    const button = this;
+    button.disabled = true;
+
+    try {
+      const enabled = document.getElementById("bankEnabled").checked;
+      const bankName = document.getElementById("bankName").value.trim();
+      const accountName = document.getElementById("accountName").value.trim();
+      const accountNumber = document.getElementById("accountNumber").value.trim();
+
+      if (enabled && (!bankName || !accountName || !accountNumber)) {
+        throw new Error("Enter bank name, account name and account number before enabling transfers.");
+      }
+
+      await savePaymentSettings({
+        bank_transfer_enabled:enabled,
+        bank_name:bankName || null,
+        account_name:accountName || null,
+        account_number:accountNumber || null,
+        bank_currency:document.getElementById("bankCurrency").value,
+        bank_instructions:document.getElementById("bankInstructions").value.trim() || null
+      });
+
+      paymentMessage("Bank transfer settings saved.");
+
+    } catch(error) {
+      paymentMessage(error.message,true);
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  document.getElementById("addCryptoWallet").addEventListener("click",function() {
+    const coin = document.getElementById("cryptoCoin").value;
+    const network = document.getElementById("cryptoNetwork").value;
+    const address = document.getElementById("cryptoAddress").value.trim();
+    const instructions = document.getElementById("cryptoInstructions").value.trim();
+
+    if (!address) {
+      paymentMessage("Enter a wallet address first.",true);
+      return;
+    }
+
+    if (cryptoWallets.some(w => w.coin === coin && w.network === network && w.address === address)) {
+      paymentMessage("This wallet is already in your list.",true);
+      return;
+    }
+
+    cryptoWallets.push({coin,network,address,instructions});
+
+    document.getElementById("cryptoAddress").value = "";
+    document.getElementById("cryptoInstructions").value = "";
+
+    renderCryptoWallets();
+    paymentMessage("Wallet added. Click Save crypto settings to store it.");
+  });
+
+  document.getElementById("saveCryptoSettings").addEventListener("click",async function() {
+    const button = this;
+    button.disabled = true;
+
+    try {
+      const enabled = document.getElementById("cryptoEnabled").checked;
+
+      if (enabled && cryptoWallets.length === 0) {
+        throw new Error("Add at least one wallet before enabling crypto payments.");
+      }
+
+      await savePaymentSettings({
+        crypto_enabled:enabled,
+        crypto_wallets:cryptoWallets
+      });
+
+      paymentMessage("Cryptocurrency settings saved.");
+
+    } catch(error) {
+      paymentMessage(error.message,true);
+    } finally {
+      button.disabled = false;
+    }
+  });
+}
+
+/* OWNER PAYMENT REVIEW */
+async function loadPayments() {
+  if (!isOwner) {
+    paymentReviewContent.textContent =
+      "Payment approval is available to the workspace owner only.";
+    return;
+  }
+
+  paymentReviewContent.textContent = "Loading payment records...";
+
+  try {
+    const {data,error} = await db
+      .from("payments")
+      .select(`
+        id,
+        provider,
+        provider_reference,
+        amount,
+        currency,
+        status,
+        created_at,
+        deliveries (
+          public_reference,
+          customer_first_name,
+          customer_last_name
+        )
+      `)
+      .eq("workspace_id",profile.workspace_id)
+      .order("created_at",{ascending:false})
+      .limit(100);
+
+    if (error) throw error;
+
+    paymentReviewContent.innerHTML = "";
+
+    if (!data || data.length === 0) {
+      const empty = document.createElement("div");
+      empty.className = "payment-empty";
+      empty.textContent = "No payment submissions yet.";
+      paymentReviewContent.appendChild(empty);
+      return;
+    }
+
+    const tableWrap = document.createElement("div");
+    tableWrap.className = "payment-review-wrap";
+
+    const table = document.createElement("table");
+    const thead = document.createElement("thead");
+    const headerRow = document.createElement("tr");
+
+    [
+      "DELIVERY REFERENCE",
+      "CUSTOMER",
+      "METHOD",
+      "TRANSACTION REFERENCE",
+      "AMOUNT",
+      "STATUS",
+      "ACTION"
+    ].forEach(function(label) {
+      const th = document.createElement("th");
+      th.textContent = label;
+      headerRow.appendChild(th);
+    });
+
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    const tbody = document.createElement("tbody");
+
+    data.forEach(function(payment) {
+      const tr = document.createElement("tr");
+      const delivery = payment.deliveries || {};
+
+      const customerName = [
+        delivery.customer_first_name,
+        delivery.customer_last_name
+      ].filter(Boolean).join(" ");
+
+      addCell(tr,delivery.public_reference || "-");
+      addCell(tr,customerName || "-");
+
+      addCell(
+        tr,
+        payment.provider === "bank_transfer"
+          ? "Bank transfer"
+          : payment.provider === "cryptocurrency"
+            ? "Cryptocurrency"
+            : payment.provider
+      );
+
+      addCell(tr,payment.provider_reference || "-");
+
+      addCell(
+        tr,
+        Number(payment.amount).toLocaleString(undefined,{
+          minimumFractionDigits:2,
+          maximumFractionDigits:2
+        }) + " " + payment.currency
+      );
+
+      const statusCell = document.createElement("td");
+      const badge = document.createElement("span");
+      badge.className = "payment-status " + payment.status;
+      badge.textContent = payment.status;
+      statusCell.appendChild(badge);
+      tr.appendChild(statusCell);
+
+      const actionCell = document.createElement("td");
+
+      if (payment.status === "pending") {
+        const actions = document.createElement("div");
+        actions.className = "payment-actions";
+
+        const approveButton = document.createElement("button");
+        approveButton.type = "button";
+        approveButton.className = "btn btn-primary btn-small";
+        approveButton.textContent = "Approve";
+
+        const rejectButton = document.createElement("button");
+        rejectButton.type = "button";
+        rejectButton.className = "btn btn-small";
+        rejectButton.textContent = "Reject";
+
+        async function reviewPayment(decision,button) {
+          const question = decision === "approve"
+            ? "Have you confirmed that this payment has arrived? Approve it?"
+            : "Are you sure you want to reject this payment?";
+
+          if (!window.confirm(question)) return;
+
+          approveButton.disabled = true;
+          rejectButton.disabled = true;
+          button.textContent = "Processing...";
+
+          try {
+            const {data:result,error:reviewError} = await db.rpc(
+              "owner_review_payment",
+              {
+                p_payment_id:payment.id,
+                p_decision:decision
+              }
+            );
+
+            if (reviewError) throw reviewError;
+
+            if (!result || !result.success) {
+              throw new Error("Payment review was not completed.");
+            }
+
+            showSuccess(
+              decision === "approve"
+                ? "Payment approved successfully."
+                : "Payment rejected successfully."
+            );
+
+            await loadPayments();
+
+          } catch(error) {
+            showError("Payment review failed: " + error.message);
+            approveButton.disabled = false;
+            rejectButton.disabled = false;
+            button.textContent =
+              decision === "approve" ? "Approve" : "Reject";
+          }
+        }
+
+        approveButton.addEventListener("click",function() {
+          reviewPayment("approve",approveButton);
+        });
+
+        rejectButton.addEventListener("click",function() {
+          reviewPayment("reject",rejectButton);
+        });
+
+        actions.append(approveButton,rejectButton);
+        actionCell.appendChild(actions);
+
+      } else {
+        actionCell.textContent = "Reviewed";
+      }
+
+      tr.appendChild(actionCell);
+      tbody.appendChild(tr);
+    });
+
+    table.appendChild(tbody);
+    tableWrap.appendChild(table);
+    paymentReviewContent.appendChild(tableWrap);
+
+  } catch(error) {
+    console.error("Payment loading error:",error);
+    paymentReviewContent.textContent =
+      "Unable to load payments: " + error.message;
+  }
+}
+
+/* DELIVERY FEE CONTROL */
+function createFeeControl(delivery,refreshDeliveries) {
+  const control = document.createElement("div");
+  control.className = "fee-control";
+
+  const amountInput = document.createElement("input");
+  amountInput.type = "number";
+  amountInput.min = "0.01";
+  amountInput.step = "0.01";
+  amountInput.placeholder = "Enter fee";
+  amountInput.value = delivery.delivery_fee !== null
+    ? delivery.delivery_fee
+    : "";
+
+  const currencySelect = document.createElement("select");
+
+  currencies.forEach(function(currency) {
+    const option = document.createElement("option");
+    option.value = currency;
+    option.textContent = currency;
+    currencySelect.appendChild(option);
+  });
+
+  currencySelect.value = currencies.includes(delivery.delivery_currency)
+    ? delivery.delivery_currency
+    : "NGN";
+
+  const saveButton = document.createElement("button");
+  saveButton.type = "button";
+  saveButton.className = "btn btn-primary btn-small";
+  saveButton.textContent = "Save fee";
+
+  saveButton.addEventListener("click",async function() {
+    const amount = Number(amountInput.value);
+    const currency = currencySelect.value;
+
+    if (!amountInput.value.trim() || !Number.isFinite(amount) || amount <= 0) {
+      showError("Enter a valid delivery fee greater than zero.");
+      return;
+    }
+
+    saveButton.disabled = true;
+    saveButton.textContent = "Saving...";
+
+    try {
+      const {data:updated,error:updateError} = await db
+        .from("deliveries")
+        .update({delivery_fee:amount,delivery_currency:currency})
+        .eq("id",delivery.id)
+        .eq("workspace_id",profile.workspace_id)
+        .select("id");
+
+      if (updateError) throw updateError;
+      if (!updated || !updated.length) {
+        throw new Error("Fee was not saved. Check your permissions.");
+      }
+
+      showSuccess("Delivery fee saved: " + formatFee(amount,currency));
+      await refreshDeliveries();
+
+    } catch(error) {
+      showError("Fee save failed: " + error.message);
+      saveButton.disabled = false;
+      saveButton.textContent = "Save fee";
+    }
+  });
+
+  control.append(amountInput,currencySelect,saveButton);
+  return control;
+}
+
+/* INITIALIZE DASHBOARD */
+try {
+  const config = window.DELIVERY_DESK_CONFIG;
+
+  if (!config || !config.SUPABASE_URL ||
+      !config.SUPABASE_ANON_KEY || !window.supabase) {
+    throw new Error("Supabase configuration is missing. Check assets/config.js.");
+  }
+
+  db = window.supabase.createClient(
+    config.SUPABASE_URL,
+    config.SUPABASE_ANON_KEY
+  );
+
+  logoutButton.addEventListener("click",async function() {
+    logoutButton.disabled = true;
+    logoutButton.textContent = "Signing out...";
+
+    const {error} = await db.auth.signOut();
+
+    if (error) {
+      showError("Sign out failed: " + error.message);
+      logoutButton.disabled = false;
+      logoutButton.textContent = "↪ Sign out";
+      return;
+    }
+
+    window.location.replace("login.html");
+  });
+
+  const {data:sessionData,error:sessionError} = await db.auth.getSession();
+  if (sessionError) throw sessionError;
+
+  if (!sessionData.session) {
+    window.location.replace("login.html");
+    return;
+  }
+
+  user = sessionData.session.user;
+
+  const {data:profileData,error:profileError} = await db
+    .from("user_profiles")
+    .select("role,workspace_id,display_name,is_active")
+    .eq("user_id",user.id)
+    .single();
+
+  if (profileError) throw profileError;
+
+  profile = profileData;
+
+  if (!profile || !profile.is_active ||
+      !["owner","employee"].includes(profile.role)) {
+    await db.auth.signOut();
+    window.location.replace("login.html");
+    return;
+  }
+
+  isOwner = profile.role === "owner";
+
+  const {data:workspaceData,error:workspaceError} = await db
+    .from("workspaces")
+    .select("name,public_form_token")
+    .eq("id",profile.workspace_id)
+    .single();
+
+  if (workspaceError) throw workspaceError;
+
+  workspace = workspaceData;
+
+  const displayName = profile.display_name ||
+    (user.email ? user.email.split("@")[0] : "User");
+
+  document.getElementById("workspaceName").textContent = workspace.name;
+  document.getElementById("sideUser").textContent = displayName;
+  document.getElementById("sideRole").textContent =
+    isOwner ? "Owner account" : "Employee account";
+  document.getElementById("welcomeTitle").textContent =
+    "Welcome, " + displayName;
+  document.getElementById("welcomeDescription").textContent =
+    isOwner
+      ? "Manage your delivery workspace."
+      : "Manage your assigned delivery requests.";
+  document.getElementById("roleStat").textContent =
+    isOwner ? "Owner" : "Employee";
+  document.getElementById("teamAccountName").textContent = displayName;
+  document.getElementById("teamAccountRole").textContent = profile.role;
+  document.getElementById("settingsWorkspace").textContent = workspace.name;
+  document.getElementById("settingsRole").textContent = profile.role;
+
+  setupCustomerLink();
+  setupPaymentSettings();
+
+  if (isOwner) {
+    await loadPaymentSettings();
+  }
+
+  if (!isOwner) {
+    document.getElementById("teamNav").style.display = "none";
+    document.getElementById("settingsNav").style.display = "none";
+    document.getElementById("manageLabel").style.display = "none";
+    document.getElementById("team").style.display = "none";
+    document.getElementById("settings").style.display = "none";
+  }
+
+  /* LOAD DELIVERIES */
+  async function loadDeliveries() {
+    setLoading("Loading deliveries...");
+
+    let employees = [];
+
+    if (isOwner) {
+      const {data:employeeData,error:employeeError} = await db
+        .from("user_profiles")
+        .select("user_id,display_name")
+        .eq("workspace_id",profile.workspace_id)
+        .eq("role","employee")
+        .eq("is_active",true)
+        .order("display_name");
+
+      if (employeeError) throw employeeError;
+      employees = employeeData || [];
+    }
+
+    let query = db.from("deliveries")
+      .select(`
+        id,
+        workspace_id,
+        public_reference,
+        customer_first_name,
+        customer_last_name,
+        city,
+        country,
+        preferred_payment_method,
+        status,
+        assigned_employee_id,
+        created_at,
+        delivery_fee,
+        delivery_currency
+      `)
+      .order("created_at",{ascending:false})
+      .limit(100);
+
+    if (!isOwner) {
+      query = query.eq("assigned_employee_id",user.id);
+    }
+
+    const {data:deliveries,error:deliveryError} = await query;
+    if (deliveryError) throw deliveryError;
+
+    rows.innerHTML = "";
+
+    if (!deliveries || deliveries.length === 0) {
+      setLoading(
+        isOwner
+          ? "No delivery requests found."
+          : "No deliveries have been assigned to you yet."
+      );
+    } else {
+
+      deliveries.forEach(function(delivery) {
+        const tr = document.createElement("tr");
+
+        addCell(tr,delivery.public_reference);
+        addCell(tr,[
+          delivery.customer_first_name,
+          delivery.customer_last_name
+        ].filter(Boolean).join(" "));
+
+        addCell(tr,[
+          delivery.city,
+          delivery.country
+        ].filter(Boolean).join(", "));
+
+        addCell(tr,delivery.preferred_payment_method);
+
+        const feeCell = document.createElement("td");
+
+        if (isOwner) {
+          feeCell.appendChild(createFeeControl(delivery,loadDeliveries));
+        } else {
+          const feeDisplay = document.createElement("span");
+          feeDisplay.className = "fee-display";
+          feeDisplay.textContent = formatFee(
+            delivery.delivery_fee,
+            delivery.delivery_currency
+          );
+          feeCell.appendChild(feeDisplay);
+        }
+
+        tr.appendChild(feeCell);
+
+        const statusCell = document.createElement("td");
+        const statusBadge = document.createElement("span");
+        statusBadge.className = "status-label";
+        statusBadge.textContent = formatStatus(delivery.status);
+        statusCell.appendChild(statusBadge);
+        tr.appendChild(statusCell);
+
+        const assignmentCell = document.createElement("td");
+
+        if (isOwner) {
+          const control = document.createElement("div");
+          control.className = "assignment-control";
+
+          const select = document.createElement("select");
+          const unassigned = document.createElement("option");
+          unassigned.value = "";
+          unassigned.textContent = "Unassigned";
+          select.appendChild(unassigned);
+
+          employees.forEach(function(employee) {
+            const option = document.createElement("option");
+            option.value = employee.user_id;
+            option.textContent = employee.display_name || "Employee";
+            select.appendChild(option);
+          });
+
+          select.value = delivery.assigned_employee_id || "";
+
+          const assignButton = document.createElement("button");
+          assignButton.type = "button";
+          assignButton.className = "btn btn-primary btn-small";
+          assignButton.textContent = "Assign";
+
+          assignButton.addEventListener("click",async function() {
+            assignButton.disabled = true;
+            assignButton.textContent = "Saving...";
+
+            try {
+              const {data:updated,error:updateError} = await db
+                .from("deliveries")
+                .update({assigned_employee_id:select.value || null})
+                .eq("id",delivery.id)
+                .eq("workspace_id",profile.workspace_id)
+                .select("id");
+
+              if (updateError) throw updateError;
+              if (!updated || !updated.length) {
+                throw new Error("No delivery was updated. Check your database permissions.");
+              }
+
+              showSuccess("Employee assignment saved.");
+              await loadDeliveries();
+
+            } catch(error) {
+              showError("Assignment failed: " + error.message);
+              assignButton.disabled = false;
+              assignButton.textContent = "Assign";
+            }
+          });
+
+          control.append(select,assignButton);
+          assignmentCell.appendChild(control);
+
+        } else {
+          const control = document.createElement("div");
+          control.className = "assignment-control";
+
+          const statusSelect = document.createElement("select");
+
+          const allowedStatuses = [
+            {value:"accepted",label:"Accepted"},
+            {value:"picked_up",label:"Picked up"},
+            {value:"in_transit",label:"In transit"},
+            {value:"delivered",label:"Delivered"},
+            {value:"failed",label:"Failed delivery"}
+          ];
+
+          allowedStatuses.forEach(function(status) {
+            const option = document.createElement("option");
+            option.value = status.value;
+            option.textContent = status.label;
+            statusSelect.appendChild(option);
+          });
+
+          const currentStatusExists =
+            allowedStatuses.some(status => status.value === delivery.status);
+
+          statusSelect.value =
+            currentStatusExists ? delivery.status : "accepted";
+
+          const updateButton = document.createElement("button");
+          updateButton.type = "button";
+          updateButton.className = "btn btn-primary btn-small";
+          updateButton.textContent = "Update status";
+
+          updateButton.addEventListener("click",async function() {
+            updateButton.disabled = true;
+            updateButton.textContent = "Saving...";
+
+            try {
+              const {error:rpcError} = await db.rpc(
+                "employee_update_delivery_status",
+                {
+                  p_delivery_id:delivery.id,
+                  p_new_status:statusSelect.value
+                }
+              );
+
+              if (rpcError) throw rpcError;
+
+              showSuccess("Delivery status updated successfully.");
+              await loadDeliveries();
+
+            } catch(error) {
+              showError("Status update failed: " + error.message);
+              updateButton.disabled = false;
+              updateButton.textContent = "Update status";
+            }
+          });
+
+          control.append(statusSelect,updateButton);
+          assignmentCell.appendChild(control);
+        }
+
+        tr.appendChild(assignmentCell);
+        rows.appendChild(tr);
+      });
+    }
+
+    document.getElementById("totalCount").textContent = deliveries.length;
+    document.getElementById("pendingCount").textContent =
+      deliveries.filter(d => d.status === "new").length;
+    document.getElementById("completedCount").textContent =
+      deliveries.filter(d => d.status === "delivered").length;
+    document.getElementById("tableCount").textContent =
+      deliveries.length + " requests";
+  }
+
+  await loadDeliveries();
+
+  if (isOwner) {
+    await loadPayments();
+  } else {
+    paymentReviewContent.textContent =
+      "Payment approval is available to the workspace owner only.";
+  }
+
+} catch(error) {
+  console.error("Dashboard error:",error);
+  showError(
+    "Dashboard error: " +
+    (error.message || "An unexpected error occurred.")
+  );
+  setLoading("Unable to load deliveries. Check the error message below.");
+}
+
+})();
+</script>
+</body>
+</html>

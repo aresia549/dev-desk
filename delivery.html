@@ -1,0 +1,962 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Request a delivery — Delivery Desk</title>
+  <link rel="stylesheet" href="assets/styles.css">
+
+  <style>
+    .payment-options {
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+      gap:12px;
+      margin:15px 0;
+    }
+
+    .payment-option {
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:14px;
+      border:1px solid #ddd;
+      border-radius:9px;
+      cursor:pointer;
+    }
+
+    .payment-option:has(input:checked) {
+      border-color:#2563eb;
+      background:#eff6ff;
+    }
+
+    .pay-icon {font-size:22px}
+
+    .payment-option span:last-child {
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+
+    .payment-option small {color:#666}
+
+    .payment-instructions,
+    .payment-proof,
+    .status-check {
+      margin:16px 0;
+      padding:18px;
+      border:1px solid #d8e2f0;
+      border-radius:9px;
+      background:#f8fafc;
+      overflow-wrap:anywhere;
+    }
+
+    .payment-instructions h3,
+    .payment-proof h3,
+    .status-check h3 {
+      margin-top:0;
+    }
+
+    .payment-detail {
+      padding:10px 0;
+      border-bottom:1px solid #e5e7eb;
+    }
+
+    .payment-detail:last-child {border-bottom:0}
+
+    .payment-detail b {
+      display:block;
+      margin-bottom:4px;
+    }
+
+    .payment-detail span {overflow-wrap:anywhere}
+
+    .wallet-card {
+      padding:13px;
+      margin:12px 0;
+      border:1px solid #ddd;
+      border-radius:8px;
+      background:white;
+    }
+
+    .wallet-card p {margin:6px 0}
+
+    .hidden {display:none!important}
+
+    .payment-message {
+      color:#666;
+      font-size:13px;
+      margin-top:10px;
+    }
+
+    .copy-address {
+      margin-top:8px;
+      padding:8px 12px;
+      border:1px solid #ccc;
+      border-radius:6px;
+      cursor:pointer;
+      background:white;
+    }
+
+    .success-payment {
+      margin-top:18px;
+      padding:15px;
+      border-radius:8px;
+      background:#f0fdf4;
+      border:1px solid #bbf7d0;
+    }
+
+    .payment-proof label,
+    .status-check label {
+      display:block;
+      margin:12px 0;
+    }
+
+    .payment-proof input,
+    .payment-proof select,
+    .status-check input {
+      width:100%;
+      box-sizing:border-box;
+      padding:12px;
+      margin-top:6px;
+      border:1px solid #ccc;
+      border-radius:7px;
+    }
+
+    .reference-display {
+      padding:12px;
+      background:#eff6ff;
+      border:1px solid #bfdbfe;
+      border-radius:8px;
+      overflow-wrap:anywhere;
+      font-weight:bold;
+    }
+
+    .status-result {
+      margin-top:14px;
+      padding:13px;
+      border-radius:8px;
+      background:#f1f5f9;
+      border:1px solid #cbd5e1;
+    }
+
+    .status-result.approved {
+      background:#f0fdf4;
+      border-color:#bbf7d0;
+    }
+
+    .status-result.rejected {
+      background:#fef2f2;
+      border-color:#fecaca;
+    }
+
+    .status-result.pending {
+      background:#fffbeb;
+      border-color:#fde68a;
+    }
+
+    .proof-help {
+      font-size:13px;
+      color:#666;
+    }
+  </style>
+</head>
+
+<body class="app-bg">
+
+<nav class="topbar">
+  <a class="brand" href="index.html">
+    <span class="brand-mark">D</span>
+    <span>delivery<span class="brand-light">desk</span></span>
+  </a>
+  <a class="text-link" href="index.html">← Back to home</a>
+</nav>
+
+<main class="form-layout wrap">
+
+  <aside class="form-aside">
+    <span class="eyebrow"><i></i> CUSTOMER DELIVERY FORM</span>
+    <h1>Let's get your package moving.</h1>
+    <p>Share your details and our delivery team will review your request.</p>
+
+    <div class="aside-note">
+      <span>🔒</span>
+      <div>
+        <b>Your details stay protected</b>
+        <small>We only ask for information needed to arrange your delivery.</small>
+      </div>
+    </div>
+  </aside>
+
+  <section class="form-card">
+
+    <div class="form-heading">
+      <div>
+        <span class="eyebrow">NEW REQUEST</span>
+        <h2>Delivery information</h2>
+        <p>Fields marked * are required.</p>
+      </div>
+    </div>
+
+    <form id="deliveryForm">
+
+      <h3 class="section-title">Your contact details</h3>
+
+      <div class="field-grid">
+        <label>First name *
+          <input name="firstName" required>
+        </label>
+
+        <label>Last name *
+          <input name="lastName" required>
+        </label>
+
+        <label>Email address *
+          <input type="email" name="email" required>
+        </label>
+
+        <label>Phone number *
+          <input type="tel" name="phone" required>
+        </label>
+      </div>
+
+      <h3 class="section-title section-gap">Where should we deliver?</h3>
+
+      <div class="field-grid">
+        <label>Country *
+          <input name="country" required>
+        </label>
+
+        <label>State / region *
+          <input name="state" required>
+        </label>
+
+        <label>City *
+          <input name="city" required>
+        </label>
+
+        <label>Postal / ZIP code
+          <input name="postalCode">
+        </label>
+      </div>
+
+      <label class="full-field">
+        Full delivery address *
+        <textarea name="address" rows="2" required></textarea>
+      </label>
+
+      <h3 class="section-title section-gap">Package details</h3>
+
+      <div class="field-grid">
+        <label>What are you sending? *
+          <input name="package" required>
+        </label>
+
+        <label>Preferred delivery date
+          <input type="date" name="deliveryDate">
+        </label>
+      </div>
+
+      <label class="full-field">
+        Additional instructions
+        <textarea name="instructions" rows="2"></textarea>
+      </label>
+
+      <h3 class="section-title section-gap">Preferred payment method</h3>
+
+      <p class="field-hint">
+        Available payment methods are provided by the delivery workspace.
+      </p>
+
+      <div id="paymentLoading" class="payment-message">
+        Loading available payment methods...
+      </div>
+
+      <div id="paymentUnavailable" class="notice hidden">
+        No payment methods have been enabled yet. You can submit your delivery request and discuss payment with the delivery team.
+      </div>
+
+      <div class="payment-options hidden" id="paymentOptions">
+
+        <label class="payment-option hidden" id="bankOption">
+          <input type="radio" name="paymentMethod" value="Bank transfer">
+          <span class="pay-icon">⇄</span>
+          <span>
+            <b>Bank transfer</b>
+            <small>Pay using the displayed bank details</small>
+          </span>
+        </label>
+
+        <label class="payment-option hidden" id="cryptoOption">
+          <input type="radio" name="paymentMethod" value="Cryptocurrency">
+          <span class="pay-icon">₿</span>
+          <span>
+            <b>Cryptocurrency</b>
+            <small>Bitcoin, USDT, USDC and others</small>
+          </span>
+        </label>
+
+        <label class="payment-option">
+          <input type="radio" name="paymentMethod" value="Confirm with me" checked>
+          <span class="pay-icon">?</span>
+          <span>
+            <b>Help me choose</b>
+            <small>Discuss payment options with the team</small>
+          </span>
+        </label>
+
+      </div>
+
+      <div id="paymentInstructions" class="payment-instructions hidden"></div>
+
+      <div class="notice">
+        <b>Payment safety:</b>
+        Never enter card numbers, CVV, PINs, passwords or one-time codes here.
+        Only send funds to verified payment details.
+      </div>
+
+      <label class="consent">
+        <input type="checkbox" required>
+        I confirm that the information provided is correct and may be used to process this delivery request.
+      </label>
+
+      <button class="btn btn-primary submit-btn" type="submit">
+        Submit delivery request →
+      </button>
+
+      <p class="form-footnote">
+        Your request will be sent to the delivery workspace associated with this link.
+      </p>
+
+    </form>
+
+    <!-- SUCCESS PANEL -->
+    <div id="successPanel" class="success-panel hidden">
+
+      <div class="success-mark">✓</div>
+      <h2>Request submitted successfully</h2>
+      <p>Your delivery request has been received.</p>
+
+      <div id="submittedReference" class="reference-display"></div>
+
+      <div id="submittedPayment" class="success-payment hidden"></div>
+
+      <!-- PAYMENT PROOF FORM -->
+      <div id="paymentProofSection" class="payment-proof hidden">
+
+        <h3>Submit payment confirmation</h3>
+
+        <p>
+          After making your payment, enter the transaction reference or blockchain transaction hash below.
+        </p>
+
+        <form id="paymentProofForm">
+
+          <div id="proofBankFields" class="hidden">
+            <label>Bank transaction reference *
+              <input id="bankReference" type="text"
+                     placeholder="Enter your bank transaction reference">
+            </label>
+          </div>
+
+          <div id="proofCryptoFields" class="hidden">
+
+            <label>Cryptocurrency *
+              <select id="cryptoCoin">
+                <option value="">Select coin</option>
+                <option value="Bitcoin">Bitcoin (BTC)</option>
+                <option value="USDT">USDT</option>
+                <option value="USDC">USDC</option>
+                <option value="Ethereum">Ethereum (ETH)</option>
+                <option value="Other">Other</option>
+              </select>
+            </label>
+
+            <label>Network *
+              <input id="cryptoNetwork" type="text"
+                     placeholder="e.g. Bitcoin, ERC20, TRC20, Polygon">
+            </label>
+
+            <label>Transaction hash *
+              <input id="cryptoReference" type="text"
+                     placeholder="Paste your transaction hash">
+            </label>
+
+          </div>
+
+          <p class="proof-help">
+            Do not submit passwords, wallet recovery phrases, private keys, PINs or OTPs.
+          </p>
+
+          <button class="btn btn-primary" id="proofSubmitButton" type="submit">
+            Submit payment confirmation
+          </button>
+
+          <p id="proofMessage" class="payment-message" aria-live="polite"></p>
+
+        </form>
+
+      </div>
+
+      <a class="btn btn-primary" id="anotherRequest" href="delivery.html">
+        Create another request
+      </a>
+
+      <a class="text-link" href="index.html">Return home</a>
+
+    </div>
+
+    <!-- CUSTOMER PAYMENT STATUS CHECKER -->
+    <div class="status-check">
+
+      <h3>Check your payment status</h3>
+
+      <p>
+        Already submitted a delivery request? Enter your delivery reference to see whether your payment has been approved.
+      </p>
+
+      <form id="statusForm">
+
+        <label>Delivery reference
+          <input id="statusReference" type="text"
+                 placeholder="Enter your delivery reference" required>
+        </label>
+
+        <button class="btn btn-primary" type="submit" id="statusButton">
+          Check payment status
+        </button>
+
+      </form>
+
+      <div id="statusResult" class="status-result hidden" aria-live="polite"></div>
+
+    </div>
+
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/config.js"></script>
+
+<script>
+(async function() {
+
+  const config = window.DELIVERY_DESK_CONFIG;
+
+  if (!config || !window.supabase ||
+      !config.SUPABASE_URL || !config.SUPABASE_ANON_KEY) {
+    alert("Supabase configuration is missing. Please contact the delivery team.");
+    return;
+  }
+
+  const db = window.supabase.createClient(
+    config.SUPABASE_URL,
+    config.SUPABASE_ANON_KEY
+  );
+
+  const WORKSPACE_TOKEN =
+    new URLSearchParams(window.location.search).get("token");
+
+  const form = document.getElementById("deliveryForm");
+  const successPanel = document.getElementById("successPanel");
+  const submitButton = form.querySelector('button[type="submit"]');
+
+  const paymentLoading = document.getElementById("paymentLoading");
+  const paymentUnavailable = document.getElementById("paymentUnavailable");
+  const paymentOptions = document.getElementById("paymentOptions");
+  const paymentInstructions = document.getElementById("paymentInstructions");
+
+  const bankOption = document.getElementById("bankOption");
+  const cryptoOption = document.getElementById("cryptoOption");
+
+  const paymentProofSection = document.getElementById("paymentProofSection");
+  const paymentProofForm = document.getElementById("paymentProofForm");
+  const proofBankFields = document.getElementById("proofBankFields");
+  const proofCryptoFields = document.getElementById("proofCryptoFields");
+  const proofSubmitButton = document.getElementById("proofSubmitButton");
+  const proofMessage = document.getElementById("proofMessage");
+
+  const statusForm = document.getElementById("statusForm");
+  const statusButton = document.getElementById("statusButton");
+  const statusResult = document.getElementById("statusResult");
+
+  let paymentData = null;
+  let submittedReference = null;
+  let submittedPaymentMethod = null;
+
+  if (!WORKSPACE_TOKEN) {
+    form.innerHTML = `
+      <div class="notice">
+        <b>Invalid or missing customer form link.</b>
+        <p>Please request a delivery link from the delivery team.</p>
+      </div>
+    `;
+    return;
+  }
+
+  document.getElementById("anotherRequest").href =
+    "delivery.html?token=" + encodeURIComponent(WORKSPACE_TOKEN);
+
+  function addDetail(container,label,value) {
+    if (!value) return;
+
+    const detail = document.createElement("div");
+    detail.className = "payment-detail";
+
+    const heading = document.createElement("b");
+    heading.textContent = label;
+
+    const text = document.createElement("span");
+    text.textContent = value;
+
+    detail.append(heading,text);
+    container.appendChild(detail);
+  }
+
+  async function loadPaymentInstructions() {
+
+    try {
+
+      const {data,error} = await db.rpc(
+        "get_public_payment_instructions",
+        {p_workspace_token:WORKSPACE_TOKEN}
+      );
+
+      if (error) throw error;
+
+      if (!data || !data.success) {
+        throw new Error("Unable to retrieve payment settings.");
+      }
+
+      paymentData = data;
+
+      paymentLoading.classList.add("hidden");
+
+      const bank = data.bank_transfer;
+      const wallets = Array.isArray(data.cryptocurrency)
+        ? data.cryptocurrency
+        : [];
+
+      const hasBank = !!bank;
+      const hasCrypto = wallets.length > 0;
+
+      bankOption.classList.toggle("hidden",!hasBank);
+      cryptoOption.classList.toggle("hidden",!hasCrypto);
+
+      paymentOptions.classList.remove("hidden");
+
+      if (!hasBank && !hasCrypto) {
+        paymentUnavailable.classList.remove("hidden");
+      }
+
+      updatePaymentDisplay();
+
+    } catch(error) {
+
+      console.error("Payment settings error:",error);
+
+      paymentLoading.textContent =
+        "Payment instructions could not be loaded. You may still submit your delivery request and discuss payment with the team.";
+
+      paymentOptions.classList.remove("hidden");
+      paymentUnavailable.classList.remove("hidden");
+
+    }
+  }
+
+  function updatePaymentDisplay() {
+
+    paymentInstructions.innerHTML = "";
+
+    const selected = form.querySelector(
+      'input[name="paymentMethod"]:checked'
+    );
+
+    if (!selected) {
+      paymentInstructions.classList.add("hidden");
+      return;
+    }
+
+    const method = selected.value;
+
+    if (method === "Bank transfer") {
+
+      const bank = paymentData && paymentData.bank_transfer;
+
+      if (!bank) {
+        paymentInstructions.classList.add("hidden");
+        return;
+      }
+
+      const heading = document.createElement("h3");
+      heading.textContent = "Bank transfer instructions";
+      paymentInstructions.appendChild(heading);
+
+      addDetail(paymentInstructions,"Bank name",bank.bank_name);
+      addDetail(paymentInstructions,"Account name",bank.account_name);
+      addDetail(paymentInstructions,"Account number",bank.account_number);
+      addDetail(paymentInstructions,"Currency",bank.currency);
+      addDetail(paymentInstructions,"Instructions",bank.instructions);
+
+      paymentInstructions.classList.remove("hidden");
+      return;
+    }
+
+    if (method === "Cryptocurrency") {
+
+      const wallets = paymentData && Array.isArray(paymentData.cryptocurrency)
+        ? paymentData.cryptocurrency
+        : [];
+
+      if (!wallets.length) {
+        paymentInstructions.classList.add("hidden");
+        return;
+      }
+
+      const heading = document.createElement("h3");
+      heading.textContent = "Cryptocurrency payment instructions";
+      paymentInstructions.appendChild(heading);
+
+      const warning = document.createElement("p");
+      warning.textContent =
+        "Choose the correct coin and network. Always verify the wallet address before sending funds.";
+      paymentInstructions.appendChild(warning);
+
+      wallets.forEach(function(wallet) {
+
+        const card = document.createElement("div");
+        card.className = "wallet-card";
+
+        addDetail(card,"Coin",wallet.coin);
+        addDetail(card,"Network",wallet.network);
+        addDetail(card,"Wallet address",wallet.address);
+        addDetail(card,"Instructions",wallet.instructions);
+
+        if (wallet.address) {
+
+          const copyButton = document.createElement("button");
+          copyButton.type = "button";
+          copyButton.className = "copy-address";
+          copyButton.textContent = "Copy wallet address";
+
+          copyButton.addEventListener("click",async function() {
+
+            try {
+              await navigator.clipboard.writeText(wallet.address);
+              copyButton.textContent = "Copied!";
+            } catch(error) {
+              copyButton.textContent = "Copy unavailable";
+            }
+
+          });
+
+          card.appendChild(copyButton);
+        }
+
+        paymentInstructions.appendChild(card);
+
+      });
+
+      paymentInstructions.classList.remove("hidden");
+      return;
+    }
+
+    paymentInstructions.classList.add("hidden");
+  }
+
+  form.querySelectorAll('input[name="paymentMethod"]').forEach(function(input) {
+    input.addEventListener("change",updatePaymentDisplay);
+  });
+
+  /* SUBMIT DELIVERY REQUEST */
+  form.addEventListener("submit",async function(event) {
+
+    event.preventDefault();
+
+    if (!form.reportValidity()) return;
+
+    const values = new FormData(form);
+    const selectedPayment = values.get("paymentMethod");
+
+    if (selectedPayment === "Bank transfer" &&
+        !(paymentData && paymentData.bank_transfer)) {
+      alert("Bank transfer is currently unavailable.");
+      return;
+    }
+
+    if (selectedPayment === "Cryptocurrency" &&
+        !(paymentData && Array.isArray(paymentData.cryptocurrency) &&
+          paymentData.cryptocurrency.length)) {
+      alert("Cryptocurrency payments are currently unavailable.");
+      return;
+    }
+
+    const request = {
+      p_workspace_token:WORKSPACE_TOKEN,
+      p_first_name:values.get("firstName").trim(),
+      p_last_name:values.get("lastName").trim(),
+      p_email:values.get("email").trim(),
+      p_phone:values.get("phone").trim(),
+      p_country:values.get("country").trim(),
+      p_state:values.get("state").trim(),
+      p_city:values.get("city").trim(),
+      p_postal_code:values.get("postalCode").trim(),
+      p_address:values.get("address").trim(),
+      p_package:values.get("package").trim(),
+      p_delivery_date:values.get("deliveryDate") || null,
+      p_instructions:values.get("instructions").trim(),
+      p_payment_method:selectedPayment
+    };
+
+    submitButton.disabled = true;
+    submitButton.textContent = "Submitting...";
+
+    try {
+
+      const {data,error} = await db.rpc(
+        "submit_delivery_request",
+        request
+      );
+
+      if (error) throw error;
+
+      if (!data || !data.success || !data.reference) {
+        throw new Error("Request could not be confirmed or no delivery reference was returned.");
+      }
+
+      submittedReference = data.reference;
+      submittedPaymentMethod = selectedPayment;
+
+      document.getElementById("submittedReference").textContent =
+        "Delivery reference: " + submittedReference;
+
+      document.getElementById("statusReference").value =
+        submittedReference;
+
+      const paymentSummary =
+        document.getElementById("submittedPayment");
+
+      if (selectedPayment === "Bank transfer" ||
+          selectedPayment === "Cryptocurrency") {
+
+        paymentSummary.textContent =
+          "Your delivery request has been received. After making payment, submit your transaction reference or hash below. Your payment will remain pending until the delivery team verifies it.";
+
+        paymentSummary.classList.remove("hidden");
+        paymentProofSection.classList.remove("hidden");
+
+        proofBankFields.classList.toggle(
+          "hidden", selectedPayment !== "Bank transfer"
+        );
+
+        proofCryptoFields.classList.toggle(
+          "hidden", selectedPayment !== "Cryptocurrency"
+        );
+
+      } else {
+
+        paymentSummary.textContent =
+          "The delivery team will contact you to discuss payment arrangements.";
+
+        paymentSummary.classList.remove("hidden");
+        paymentProofSection.classList.add("hidden");
+      }
+
+      form.classList.add("hidden");
+      successPanel.classList.remove("hidden");
+
+      window.scrollTo({top:0,behavior:"smooth"});
+
+    } catch(error) {
+
+      console.error(error);
+      alert("Submission failed: " + error.message);
+
+    } finally {
+
+      submitButton.disabled = false;
+      submitButton.textContent = "Submit delivery request →";
+
+    }
+
+  });
+
+  /* SUBMIT BANK OR CRYPTO PAYMENT PROOF */
+  paymentProofForm.addEventListener("submit",async function(event) {
+
+    event.preventDefault();
+
+    if (!submittedReference || !submittedPaymentMethod) {
+      proofMessage.textContent =
+        "Delivery reference is missing. Please contact the delivery team.";
+      return;
+    }
+
+    let providerReference = "";
+
+    if (submittedPaymentMethod === "Bank transfer") {
+
+      providerReference =
+        document.getElementById("bankReference").value.trim();
+
+    } else if (submittedPaymentMethod === "Cryptocurrency") {
+
+      const coin = document.getElementById("cryptoCoin").value;
+      const network = document.getElementById("cryptoNetwork").value.trim();
+      const hash = document.getElementById("cryptoReference").value.trim();
+
+      if (!coin || !network || !hash) {
+        proofMessage.textContent =
+          "Please complete the coin, network and transaction hash fields.";
+        return;
+      }
+
+      // The current database function accepts one reference field.
+      // Store coin/network alongside the transaction hash in that field.
+      providerReference =
+        coin + " / " + network + " / " + hash;
+    }
+
+    if (providerReference.length < 3) {
+      proofMessage.textContent =
+        "Please enter a valid transaction reference or hash.";
+      return;
+    }
+
+    proofSubmitButton.disabled = true;
+    proofSubmitButton.textContent = "Submitting payment proof...";
+    proofMessage.textContent = "";
+
+    try {
+
+      const {data,error} = await db.rpc(
+        "submit_payment_proof",
+        {
+          p_workspace_token:WORKSPACE_TOKEN,
+          p_delivery_reference:submittedReference,
+          p_provider:submittedPaymentMethod,
+          p_customer_reference:providerReference
+        }
+      );
+
+      if (error) throw error;
+
+      if (!data || !data.success) {
+        throw new Error("Payment proof could not be submitted.");
+      }
+
+      proofMessage.textContent =
+        "Payment proof submitted successfully. Your payment is now pending verification.";
+
+      proofMessage.style.color = "green";
+
+      proofSubmitButton.textContent = "Payment proof submitted";
+      paymentProofForm.querySelectorAll("input,select,button").forEach(function(element) {
+        element.disabled = true;
+      });
+
+      checkPaymentStatus(submittedReference);
+
+    } catch(error) {
+
+      console.error(error);
+
+      proofMessage.textContent =
+        "Payment submission failed: " + error.message;
+
+      proofMessage.style.color = "red";
+
+      proofSubmitButton.disabled = false;
+      proofSubmitButton.textContent = "Submit payment confirmation";
+
+    }
+
+  });
+
+  /* CHECK CUSTOMER PAYMENT STATUS */
+  async function checkPaymentStatus(reference) {
+
+    statusResult.classList.remove("hidden","approved","rejected","pending");
+    statusResult.textContent = "Checking payment status...";
+
+    try {
+
+      const {data,error} = await db.rpc(
+        "get_customer_payment_status",
+        {
+          p_workspace_token:WORKSPACE_TOKEN,
+          p_delivery_reference:reference.trim()
+        }
+      );
+
+      if (error) throw error;
+
+      if (!data || !data.success) {
+        throw new Error("Could not retrieve payment status.");
+      }
+
+      const status = data.status;
+
+      statusResult.classList.remove("approved","rejected","pending");
+
+      if (status === "approved") {
+
+        statusResult.classList.add("approved");
+        statusResult.textContent =
+          "✓ Payment approved. The delivery team has verified your payment.";
+
+      } else if (status === "rejected") {
+
+        statusResult.classList.add("rejected");
+        statusResult.textContent =
+          "Payment rejected. Please contact the delivery team for assistance.";
+
+      } else if (status === "pending") {
+
+        statusResult.classList.add("pending");
+        statusResult.textContent =
+          "Payment pending. Your payment proof has been received and is awaiting verification.";
+
+      } else {
+
+        statusResult.textContent =
+          "No payment proof has been submitted for this delivery yet.";
+
+      }
+
+    } catch(error) {
+
+      console.error(error);
+      statusResult.textContent =
+        "Unable to check status: " + error.message;
+
+    }
+
+  }
+
+  statusForm.addEventListener("submit",async function(event) {
+
+    event.preventDefault();
+
+    const reference =
+      document.getElementById("statusReference").value.trim();
+
+    if (!reference) return;
+
+    statusButton.disabled = true;
+    statusButton.textContent = "Checking...";
+
+    await checkPaymentStatus(reference);
+
+    statusButton.disabled = false;
+    statusButton.textContent = "Check payment status";
+
+  });
+
+  await loadPaymentInstructions();
+
+})();
+</script>
+
+</body>
+</html>
