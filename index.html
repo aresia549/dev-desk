@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -40,17 +39,18 @@
     }
 
     .navbar {
-      height: 82px;
+      min-height: 82px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       border-bottom: 1px solid #edf0f4;
       background: rgba(255,255,255,.96);
-      padding: 0 max(24px, calc((100vw - 1160px)/2));
+      padding: 12px max(24px, calc((100vw - 1160px)/2));
       position: sticky;
       top: 0;
       z-index: 20;
       backdrop-filter: blur(12px);
+      gap: 20px;
     }
 
     .brand {
@@ -61,6 +61,7 @@
       font-weight: 800;
       letter-spacing: -1px;
       color: var(--navy);
+      flex-shrink: 0;
     }
 
     .brand-icon {
@@ -80,7 +81,7 @@
     .nav-links {
       display: flex;
       align-items: center;
-      gap: 34px;
+      gap: 24px;
       font-size: 14px;
       font-weight: 600;
       color: #59677a;
@@ -92,29 +93,51 @@
     .language-picker {
       display: flex;
       align-items: center;
-      gap: 6px;
-      font-size: 12px;
+      gap: 7px;
+      font-size: 13px;
       color: #59677a;
       font-weight: 600;
     }
 
-    #google_translate_element { min-width: 120px; }
-    #google_translate_element select {
-      max-width: 150px;
-      padding: 8px 10px;
-      border: 1px solid #dce3eb;
-      border-radius: 8px;
-      background: #fff;
-      color: var(--navy);
-      font: inherit;
+    #google_translate_element {
+      min-width: 145px;
+      min-height: 38px;
+      display: flex;
+      align-items: center;
+    }
+
+    #google_translate_element .goog-te-gadget {
+      font-size: 0 !important;
+      color: transparent !important;
+    }
+
+    #google_translate_element select,
+    #google_translate_element .goog-te-combo {
+      display: block !important;
+      width: 145px !important;
+      max-width: 145px !important;
+      height: 38px !important;
+      padding: 6px 10px !important;
+      border: 1px solid #dce3eb !important;
+      border-radius: 8px !important;
+      background: #fff !important;
+      color: #101d32 !important;
+      font-family: Arial, sans-serif !important;
+      font-size: 13px !important;
+      font-weight: 600 !important;
+      line-height: normal !important;
       cursor: pointer;
+    }
+
+    #google_translate_element select option {
+      color: #101d32 !important;
+      background: #ffffff !important;
+      font-size: 13px !important;
     }
 
     .goog-te-banner-frame { display: none !important; }
     body { top: 0 !important; }
     .goog-logo-link, .goog-te-gadget span { display: none !important; }
-    .goog-te-gadget { color: transparent !important; font-size: 0 !important; }
-
 
     .button {
       display: inline-flex;
@@ -146,7 +169,10 @@
       background: white;
     }
 
-    .button-outline:hover { border-color: var(--green); color: var(--green); }
+    .button-outline:hover {
+      border-color: var(--green);
+      color: var(--green);
+    }
 
     .hero {
       background: var(--navy);
@@ -530,8 +556,27 @@
     }
 
     @media(max-width: 600px) {
-      .navbar { height: 70px; padding: 0 20px; }
-      .nav-links { gap: 12px; font-size: 12px; }
+      .navbar {
+        min-height: 70px;
+        padding: 12px 20px;
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .nav-links {
+        width: 100%;
+        gap: 12px;
+        font-size: 12px;
+        flex-wrap: wrap;
+      }
+
+      #google_translate_element,
+      #google_translate_element select,
+      #google_translate_element .goog-te-combo {
+        width: 135px !important;
+        max-width: 135px !important;
+      }
+
       .nav-links .button { padding: 10px 12px; font-size: 11px; }
       .container { width: calc(100% - 36px); }
       .hero-inner { padding-top: 65px; padding-bottom: 65px; }
@@ -746,6 +791,7 @@
       );
     }
   </script>
+
   <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
 </body>
