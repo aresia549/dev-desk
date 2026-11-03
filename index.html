@@ -88,6 +88,34 @@
 
     .nav-links a:hover { color: var(--green); }
 
+    /* Language translator */
+    .language-picker {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: #59677a;
+      font-weight: 600;
+    }
+
+    #google_translate_element { min-width: 120px; }
+    #google_translate_element select {
+      max-width: 150px;
+      padding: 8px 10px;
+      border: 1px solid #dce3eb;
+      border-radius: 8px;
+      background: #fff;
+      color: var(--navy);
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .goog-te-banner-frame { display: none !important; }
+    body { top: 0 !important; }
+    .goog-logo-link, .goog-te-gadget span { display: none !important; }
+    .goog-te-gadget { color: transparent !important; font-size: 0 !important; }
+
+
     .button {
       display: inline-flex;
       align-items: center;
@@ -531,6 +559,10 @@
     </a>
 
     <div class="nav-links">
+      <div class="language-picker" aria-label="Website language">
+        <span aria-hidden="true">🌐</span>
+        <div id="google_translate_element"></div>
+      </div>
       <a href="#how">How it works</a>
       <a class="button button-outline" href="login.html">Team sign in ↗</a>
     </div>
@@ -701,6 +733,20 @@
       <small>© 2026 Delivery Desk. Built for better delivery operations.</small>
     </div>
   </footer>
+
+  <script>
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement(
+        {
+          pageLanguage: "en",
+          includedLanguages: "en,fr,es,pt,de,it,ar,zh-CN,ja,ko,ru,hi,nl,tr,sw",
+          autoDisplay: false
+        },
+        "google_translate_element"
+      );
+    }
+  </script>
+  <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
 </body>
 </html>
